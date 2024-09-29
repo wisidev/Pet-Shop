@@ -2,7 +2,7 @@
 
 ## Integrantes do Grupo
 - Willian Guilherme
-- Yuri
+- Yuri Martinelli
 - Roberta Telles
 - Sarah Mota
 
