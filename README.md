@@ -5,6 +5,7 @@
 - Yuri Martinelli
 - Roberta Telles
 - Sarah Mota
+- Gustavo Cardoso
 
 ## Descrição do Projeto
 Este projeto faz parte da avaliação do curso de Engenharia de Software, onde estamos desenvolvendo um sistema de gerenciamento para um PetShop, conforme especificações detalhadas na documentação fornecida.
