@@ -1,4 +1,4 @@
-package com.br.unisales.Controller;
+package com.br.unisales.controller;
 
 
 import com.br.unisales.service.UsuarioService;
