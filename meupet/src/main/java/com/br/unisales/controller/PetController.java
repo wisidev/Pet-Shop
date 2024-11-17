@@ -49,27 +49,35 @@ public class PetController {
     }
 
     private void cadastrarPet() {
+        // Solicitar dados do pet
         System.out.print("Nome do Animal: ");
         String nome = scanner.nextLine();
-
+    
         System.out.print("Proprietário (ID): ");
         int idProprietario = lerInteiro();
-
+    
         System.out.print("Idade: ");
         int idade = lerInteiro();
-
+    
         System.out.print("Sexo (M/F): ");
         String sexo = scanner.nextLine();
-
+    
         System.out.print("Espécie: ");
         String especie = scanner.nextLine();
-
+    
         System.out.print("Raça: ");
         String raca = scanner.nextLine();
-
+    
+        // Verificar se algum campo obrigatório está vazio
+        if (nome.isEmpty() || sexo.isEmpty() || especie.isEmpty() || raca.isEmpty()) {
+            System.out.println("Erro: Dados obrigatórios não foram preenchidos. Todos os campos devem ser preenchidos.");
+            return; // Retorna para o menu de gerenciamento de pets
+        }
+    
+        // Chamar o método de salvar para registrar o pet no banco de dados
         petService.salvar(null, nome, idProprietario, idade, sexo, especie, raca);
         System.out.println("Pet cadastrado com sucesso!");
-    }
+    }    
 
     private void listarPets() {
         List<Pet> lista = petService.listar();
@@ -94,36 +102,61 @@ public class PetController {
     }
 
     private void alterarPet() {
+        // Solicitar o ID do pet a ser alterado
         System.out.print("Digite o ID do pet a ser alterado: ");
         int idAlterar = lerInteiro();
-
+    
+        // Buscar o pet no banco de dados
         Pet pet = petService.buscarPorId(idAlterar);
+        
+        // Verificar se o pet existe
         if (pet == null) {
             System.out.println("Pet não encontrado. Verifique se o ID está correto.");
             return;
         }
-
+    
+        // Exibir os dados atuais do pet
+        System.out.println("\nDados atuais do Pet:");
+        System.out.println("Nome: " + pet.getNome());
+        System.out.println("Proprietário (ID): " + pet.getIdProprietario());
+        System.out.println("Idade: " + pet.getIdade());
+        System.out.println("Sexo: " + pet.getSexo());
+        System.out.println("Espécie: " + pet.getEspecie());
+        System.out.println("Raça: " + pet.getRaca());
+    
+        // Solicitar alterações dos dados
         System.out.print("Nome do Animal (atual: " + pet.getNome() + "): ");
         String novoNome = scanner.nextLine();
-
+        if (novoNome.isEmpty()) novoNome = pet.getNome();  // Se não informar, manter o valor atual
+    
         System.out.print("Proprietário (ID) (atual: " + pet.getIdProprietario() + "): ");
-        Integer novoIdProprietario = lerInteiro();
-
+        Integer novoIdProprietario = lerInteiro();  // Podemos deixar a ID do proprietário como está, se desejado
+    
         System.out.print("Idade (atual: " + pet.getIdade() + "): ");
         int novaIdade = lerInteiro();
-
+        
         System.out.print("Sexo (M/F) (atual: " + pet.getSexo() + "): ");
         String novoSexo = scanner.nextLine();
-
+        if (novoSexo.isEmpty()) novoSexo = pet.getSexo();  // Se não informar, manter o valor atual
+    
         System.out.print("Espécie (atual: " + pet.getEspecie() + "): ");
         String novaEspecie = scanner.nextLine();
-
+        if (novaEspecie.isEmpty()) novaEspecie = pet.getEspecie();  // Se não informar, manter o valor atual
+    
         System.out.print("Raça (atual: " + pet.getRaca() + "): ");
         String novaRaca = scanner.nextLine();
-
+        if (novaRaca.isEmpty()) novaRaca = pet.getRaca();  // Se não informar, manter o valor atual
+    
+        // Verificar se algum campo obrigatório foi deixado em branco
+        if (novoNome.isEmpty() || novoSexo.isEmpty() || novaEspecie.isEmpty() || novaRaca.isEmpty()) {
+            System.out.println("Erro: Dados obrigatórios não foram preenchidos. Todos os campos devem ser preenchidos.");
+            return; // Retorna sem salvar as alterações
+        }
+    
+        // Atualizar pet no banco de dados
         petService.salvar(idAlterar, novoNome, novoIdProprietario, novaIdade, novoSexo, novaEspecie, novaRaca);
         System.out.println("Pet alterado com sucesso!");
-    }
+    }    
 
     private int lerInteiro() {
         while (!scanner.hasNextInt()) {
