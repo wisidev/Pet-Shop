@@ -25,12 +25,6 @@ public class VacinaController {
                     listarVacinas();
                     break;
                 case 3:
-                    excluirVacina();
-                    break;
-                case 4:
-                    alterarVacina();
-                    break;
-                case 5:
                     return;
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
@@ -42,73 +36,57 @@ public class VacinaController {
         System.out.println("\nMenu Vacinas:");
         System.out.println("1. Cadastrar vacina do Pet");
         System.out.println("2. Listar vacinas do Pet");
-        System.out.println("3. Excluir vacina");
-        System.out.println("4. Alterar vacina");
-        System.out.println("5. Voltar ao menu principal");
+        System.out.println("3. Voltar ao menu principal");
         System.out.print("Escolha uma opção: ");
         return lerInteiro();
     }
 
     private void cadastrarVacina() {
-        System.out.print("Código do Animal: ");
+        System.out.print("Código do Animal (not null): ");
         Integer codigoAnimal = lerInteiro();
+        if (codigoAnimal == null) {
+            System.out.println("Código do Animal é obrigatório.");
+            return;
+        }
 
-        System.out.print("Nome da Vacina: ");
-        String nome = scanner.nextLine();
+        System.out.print("Nome da Vacina (not null): ");
+        String nome = scanner.nextLine().trim();
+        if (nome.isEmpty()) {
+            System.out.println("Nome da Vacina é obrigatório.");
+            return;
+        }
 
         System.out.print("Descrição da Vacina: ");
         String descricao = scanner.nextLine();
 
         System.out.print("Data de Aplicação (yyyy-MM-dd): ");
-        LocalDate dataAplicacao = LocalDate.parse(scanner.nextLine());
+        LocalDate dataAplicacao;
+        try {
+            dataAplicacao = LocalDate.parse(scanner.nextLine());
+        } catch (Exception e) {
+            System.out.println("Data de Aplicação inválida.");
+            return;
+        }
 
         vacinaService.salvar(null, codigoAnimal, nome, descricao, dataAplicacao);
         System.out.println("Vacina cadastrada com sucesso!");
     }
 
     private void listarVacinas() {
-        List<Vacina> lista = vacinaService.listar();
-        if (lista.isEmpty()) {
-            System.out.println("Não há vacinas cadastradas.");
+        System.out.print("Código do Animal (opcional): ");
+        String codigoAnimalInput = scanner.nextLine();
+        Integer codigoAnimal = codigoAnimalInput.isEmpty() ? null : Integer.parseInt(codigoAnimalInput);
+
+        System.out.print("Nome da Vacina (opcional): ");
+        String nomeVacina = scanner.nextLine();
+
+        List<Vacina> vacinas = vacinaService.buscarPorFiltro(codigoAnimal, nomeVacina);
+
+        if (vacinas.isEmpty()) {
+            System.out.println("Nenhuma vacina encontrada.");
         } else {
-            lista.forEach(vacina -> System.out.println("Id: " + vacina.getId() + " - Código do Animal: " + vacina.getCodigoAnimal() +
-                    " - Nome: " + vacina.getNome() + " - Descrição: " + vacina.getDescricao() +
-                    " - Data de Aplicação: " + vacina.getDataAplicacao()));
+            vacinas.forEach(vacina -> System.out.println("ID: " + vacina.getId() + " | Nome: " + vacina.getNome() + " | Data: " + vacina.getDataAplicacao()));
         }
-    }
-
-    private void excluirVacina() {
-        System.out.print("Digite o ID da vacina a ser excluída: ");
-        int idExcluir = lerInteiro();
-        String resultadoExcluir = vacinaService.excluir(idExcluir);
-        if ("ok".equals(resultadoExcluir)) {
-            System.out.println("Vacina excluída com sucesso!");
-        } else {
-            System.out.println("Erro ao excluir a vacina. Verifique se o ID está correto.");
-        }
-    }
-
-    private void alterarVacina() {
-        System.out.print("Digite o ID da vacina a ser alterada: ");
-        int idAlterar = lerInteiro();
-
-        Vacina vacina = vacinaService.buscarPorId(idAlterar);
-        if (vacina == null) {
-            System.out.println("Vacina não encontrada. Verifique se o ID está correto.");
-            return;
-        }
-
-        System.out.print("Nome da Vacina (atual: " + vacina.getNome() + "): ");
-        String novoNome = scanner.nextLine();
-
-        System.out.print("Descrição (atual: " + vacina.getDescricao() + "): ");
-        String novaDescricao = scanner.nextLine();
-
-        System.out.print("Data de Aplicação (atual: " + vacina.getDataAplicacao() + "): ");
-        LocalDate novaDataAplicacao = LocalDate.parse(scanner.nextLine());
-
-        vacinaService.salvar(idAlterar, vacina.getCodigoAnimal(), novoNome, novaDescricao, novaDataAplicacao);
-        System.out.println("Vacina alterada com sucesso!");
     }
 
     private int lerInteiro() {
@@ -117,7 +95,7 @@ public class VacinaController {
             scanner.next();
         }
         int valor = scanner.nextInt();
-        scanner.nextLine();  // Consumir a nova linha restante após a leitura do número
+        scanner.nextLine();
         return valor;
     }
 }

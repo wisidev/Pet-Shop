@@ -1,74 +1,37 @@
 package com.br.unisales.service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.br.unisales.configuration.ConfigurationManager;
 import com.br.unisales.table.Vacina;
 
 import jakarta.persistence.TypedQuery;
+import java.time.LocalDate;
+import java.util.List;
 
 public class VacinaService {
-
     private final ConfigurationManager config;
 
     public VacinaService() {
         this.config = new ConfigurationManager();
     }
 
-    public List<Vacina> listar() {
-        try {
-            TypedQuery<Vacina> query = this.config.getEntityManager().createQuery("FROM Vacina ORDER BY nome", Vacina.class);
-            return query.getResultList();
-        } catch (Exception e) {
-            System.err.println("Erro: " + e.getMessage());
-            return new ArrayList<>();
-        }
+    public List<Vacina> buscarPorFiltro(Integer codigoAnimal, String nomeVacina) {
+        String queryStr = "FROM Vacina WHERE 1=1";
+        if (codigoAnimal != null) queryStr += " AND codigoAnimal = :codigoAnimal";
+        if (nomeVacina != null && !nomeVacina.isEmpty()) queryStr += " AND nome LIKE :nome";
+
+        TypedQuery<Vacina> query = config.getEntityManager().createQuery(queryStr, Vacina.class);
+        if (codigoAnimal != null) query.setParameter("codigoAnimal", codigoAnimal);
+        if (nomeVacina != null && !nomeVacina.isEmpty()) query.setParameter("nome", "%" + nomeVacina + "%");
+
+        return query.getResultList();
     }
 
-    public Vacina buscarPorId(Integer id) {
-        try {
-            TypedQuery<Vacina> query = this.config.getEntityManager().createQuery("FROM Vacina WHERE id = :id", Vacina.class);
-            query.setParameter("id", id);
-            return query.getSingleResult();
-        } catch (Exception e) {
-            System.err.println("Erro: " + e.getMessage());
-            return null;
-        }
+    public void salvar(Integer id, Integer codigoAnimal, String nome, String descricao, LocalDate dataAplicacao) {
+        Vacina vacina = Vacina.builder().id(id).codigoAnimal(codigoAnimal).nome(nome).descricao(descricao).dataAplicacao(dataAplicacao).build();
+        var em = config.getEntityManager();
+        em.getTransaction().begin();
+        if (id == null) em.persist(vacina);
+        else em.merge(vacina);
+        em.getTransaction().commit();
     }
-
-    public Vacina salvar(Integer id, Integer codigoAnimal, String nome, String descricao, LocalDate dataAplicacao) {
-        Vacina vacina = Vacina.builder()
-                              .id(id)
-                              .codigoAnimal(codigoAnimal)
-                              .nome(nome)
-                              .descricao(descricao)
-                              .dataAplicacao(dataAplicacao)
-                              .build();
-        this.config.getEntityManager().getTransaction().begin();
-        if(id == null) {
-            this.config.getEntityManager().persist(vacina);
-        } else {
-            this.config.getEntityManager().merge(vacina);
-        }
-
-        this.config.getEntityManager().getTransaction().commit();
-        return vacina;
-    }
-
-    public String excluir(Integer id) {
-        if(id != null) {
-            Vacina vacina = this.buscarPorId(id);
-            if (vacina != null) {
-                this.config.getEntityManager().getTransaction().begin();
-                this.config.getEntityManager().remove(vacina);
-                this.config.getEntityManager().getTransaction().commit();
-                return "ok";
-            }
-        }
-        
-        return "erro";
-    }
-
 }
