@@ -49,24 +49,79 @@ public class UsuarioController {
     }
 
     private void cadastrarUsuario() {
-        System.out.print("Nome do Usuário: ");
-        String nome = scanner.nextLine();
-
-        System.out.print("Sexo (M/F): ");
-        String sexo = scanner.nextLine();
-
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-
-        System.out.print("Senha: ");
-        String senha = scanner.nextLine();
-
-        System.out.print("Grupo: ");
-        String grupo = scanner.nextLine();
-
-        usuarioService.salvar(null, nome, sexo, email, senha, grupo);
-        System.out.println("Usuário cadastrado com sucesso!");
+        String nome, sexo, email, senha, grupo;
+    
+        while (true) {
+            System.out.print("Nome do Usuário (obrigatório): ");
+            nome = scanner.nextLine();
+            if (nome.trim().isEmpty()) {
+                System.out.println("O nome é obrigatório. Tente novamente.");
+                continue;
+            }
+    
+            System.out.print("Sexo (M/F) (obrigatório): ");
+            sexo = scanner.nextLine();
+            if (sexo.trim().isEmpty() || (!sexo.equalsIgnoreCase("M") && !sexo.equalsIgnoreCase("F"))) {
+                System.out.println("Sexo é obrigatório e deve ser M ou F. Tente novamente.");
+                continue;
+            }
+    
+            System.out.print("Email (obrigatório): ");
+            email = scanner.nextLine();
+            if (email.trim().isEmpty()) {
+                System.out.println("O email é obrigatório. Tente novamente.");
+                continue;
+            }
+    
+            System.out.print("Senha (obrigatório): ");
+            senha = scanner.nextLine();
+            if (senha.trim().isEmpty()) {
+                System.out.println("A senha é obrigatória. Tente novamente.");
+                continue;
+            }
+    
+            System.out.print("Grupo (Administrador, Proprietário, Secretário, Veterinário) (obrigatório): ");
+            grupo = scanner.nextLine();
+            if (grupo.trim().isEmpty() || !(grupo.equalsIgnoreCase("Administrador") || 
+                                            grupo.equalsIgnoreCase("Proprietário") || 
+                                            grupo.equalsIgnoreCase("Secretário") || 
+                                            grupo.equalsIgnoreCase("Veterinário"))) {
+                System.out.println("Grupo inválido. Escolha entre Administrador, Proprietário, Secretário ou Veterinário.");
+                continue;
+            }
+    
+            // Salva os dados do usuário no banco de dados
+            usuarioService.salvar(null, nome, sexo, email, senha, grupo);
+            System.out.println("Usuário cadastrado com sucesso!");
+    
+            // Se o grupo for "Proprietário", abrir tela de cadastro de proprietário
+            if (grupo.equalsIgnoreCase("Proprietário")) {
+                cadastrarProprietario();
+            }
+    
+            break;
+        }
     }
+    
+    private void cadastrarProprietario() {
+        String nomeProprietario, cpf, endereco;
+    
+        // Coleta os dados do proprietário
+        System.out.print("Nome do Proprietário: ");
+        nomeProprietario = scanner.nextLine();
+    
+        System.out.print("CPF do Proprietário: ");
+        cpf = scanner.nextLine();
+    
+        System.out.print("Endereço do Proprietário: ");
+        endereco = scanner.nextLine();
+    
+        // Validação dos dados (poderiam ser mais rigorosos, como verificar CPF ou formato de endereço)
+        if (nomeProprietario.trim().isEmpty() || cpf.trim().isEmpty() || endereco.trim().isEmpty()) {
+            System.out.println("Todos os campos do proprietário são obrigatórios.");
+            return; // Caso algum campo esteja vazio, encerra o cadastro do proprietário
+        }
+    }    
 
     private void listarUsuarios() {
         List<Usuario> lista = usuarioService.listar();
